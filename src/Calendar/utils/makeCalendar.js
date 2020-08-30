@@ -1,3 +1,5 @@
+import moment from "moment";
+
 /**
  * Returns an object with moment.js days
  * @param {current} string with a date to base the calendar.

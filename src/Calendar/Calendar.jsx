@@ -8,13 +8,11 @@ import {
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
 } from "@elastic/eui";
 
 import moment from "moment";
 import makeCalendar from "./utils/makeCalendar";
+import EventForm from "./components/EventForm";
 
 import "./Calendar.css";
 
@@ -23,10 +21,15 @@ const makeCalendarItem = ({
   current = moment(),
   events = [],
   index = 0,
+  states = {},
+  actions = {},
 } = {}) => {
   const isToday = day.format("DDMMYYYY") === current.format("DDMMYYYY");
   const isWeekend = day.format("d") === "6" || day.format("d") === "0";
   const dayNumber = day.format("DD");
+
+  const { createNewEvent, editEvent, deleteEvent, saveEvent } = actions;
+  const { currentEvent } = states;
 
   return (
     <li
@@ -34,7 +37,7 @@ const makeCalendarItem = ({
       className={
         day.format("MM") === current.format("MM") ? "day" : "day other-month"
       }
-      onDoubleClick={() => console.log("Double Click", day.format())}
+      onDoubleClick={() => createNewEvent({ day })}
     >
       <div className="date">
         {isToday ? (
@@ -52,14 +55,17 @@ const makeCalendarItem = ({
               iconType="cross"
               iconSide="right"
               iconOnClick={() => {
-                console.log("cross");
+                editEvent({ event });
               }}
               onClick={() => {
-                console.log("badge");
+                deleteEvent({ event });
               }}
               iconOnClickAriaLabel="Click this icon to..."
             >
               Badge with iconOnClick being truncated
+              {currentEvent.id === event.id ? (
+                <EventForm event={currentEvent} save={saveEvent} />
+              ) : null}
             </EuiBadge>
           ))}
         </EuiBadgeGroup>
@@ -68,8 +74,15 @@ const makeCalendarItem = ({
   );
 };
 
-const View = ({ current = moment() }) => {
+const View = ({
+  current = moment(),
+  actions = {},
+  events = [],
+  states = {},
+}) => {
   const calendar = makeCalendar({ current });
+  const { currentEvent, shouldShowForm } = states;
+  const { saveEvent } = actions;
   return (
     <>
       <EuiPage>
@@ -82,6 +95,9 @@ const View = ({ current = moment() }) => {
                 </EuiTitle>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
+            {shouldShowForm ? (
+              <EventForm event={currentEvent} save={saveEvent} />
+            ) : null}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
@@ -101,7 +117,13 @@ const View = ({ current = moment() }) => {
             return (
               <ul key={index} className="days">
                 {week.days.map((day, index2) =>
-                  makeCalendarItem({ day, index: index2 })
+                  makeCalendarItem({
+                    day,
+                    actions,
+                    states,
+                    events,
+                    index: index2,
+                  })
                 )}
               </ul>
             );
