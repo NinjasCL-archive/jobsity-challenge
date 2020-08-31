@@ -8,7 +8,6 @@ const CalendarCell = ({
   day = moment(),
   current = moment(),
   events = {},
-  index = 0,
   states = {},
   actions = {},
 } = {}) => {
@@ -21,7 +20,6 @@ const CalendarCell = ({
 
   return (
     <li
-      key={index}
       className={
         day.format("MM") === current.format("MM") ? "day" : "day other-month"
       }
@@ -42,7 +40,19 @@ const CalendarCell = ({
             .filter(
               (event) => event.day.format("DDMMYY") === day.format("DDMMYY")
             )
-            .sort((ev1, ev2) => ev1.day.isBefore(ev2.day))
+            .sort((ev1, ev2) => {
+              const dayA = ev1.day.unix();
+              const dayB = ev2.day.unix();
+              if (dayA < dayB) {
+                return -1;
+              }
+
+              if (dayA > dayB) {
+                return 1;
+              }
+
+              return 0;
+            })
             .map((event, index) => (
               <EuiBadge
                 key={index}

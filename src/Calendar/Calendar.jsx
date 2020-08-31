@@ -69,12 +69,12 @@ const View = ({
               <ul key={index} className="days">
                 {week.days.map((day, index2) => (
                   <CalendarCell
+                    key={index2}
                     day={day}
                     current={current}
                     actions={actions}
                     states={states}
                     events={events}
-                    index={index2}
                   />
                 ))}
               </ul>
