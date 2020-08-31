@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { weather as API } from "../../http";
+import { debounce } from "lodash";
 
 import {
   EuiFlyout,
@@ -38,17 +39,19 @@ export default ({ event, save }) => {
 
   const [location, setLocation] = useState(event.location);
 
-  const [weather, setWeather] = useState(API.queries.get.default);
+  let weather = API.queries.get.default;
 
-  useEffect(() => {
-    // TODO: Add proper debouncing
-    if (location.length > 6) {
-      API.queries.get.query({ city: location }).then((result) => {
+  const locationQuery = (
+    { target: { value } } = { target: { value: event.location } }
+  ) => {
+    if (value) {
+      API.queries.get.query({ city: value }).then((result) => {
         console.log("Got Result", result);
-        // setWeather(result);
+        weather = result;
+        setLocation(value);
       });
     }
-  }, [location]);
+  };
 
   const handleLocationChange = ({ target: { value } }) => {
     event.location = value;
@@ -80,6 +83,7 @@ export default ({ event, save }) => {
               icon="user"
               placeholder="New York"
               onChange={handleLocationChange}
+              onBlur={locationQuery}
               value={location}
             />
           </EuiFormRow>
