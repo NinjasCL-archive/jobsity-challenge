@@ -4,3 +4,9 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 - Can Add new Events
 - Can Delete new Events
+
+## Missing Functionality
+
+- Tests
+- Show Weather (It makes the query but it does not show the result)
+- Add Different Month Support (It should be easy).
