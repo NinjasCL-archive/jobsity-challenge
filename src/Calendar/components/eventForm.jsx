@@ -10,7 +10,8 @@ import {
 } from "@elastic/eui";
 
 export default ({ event, save }) => {
-  console.log("Booting Form for Event", { event });
+  console.log("Editing", { event });
+
   return (
     <EuiFlyout ownFocus onClose={() => save({ event })} aria-labelledby="Event">
       <EuiFlyoutHeader hasBorder>

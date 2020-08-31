@@ -3,43 +3,67 @@ import Calendar, { makeEvent } from "./Calendar";
 
 export default () => {
   const [currentEvent, setCurrentEvent] = useState(null);
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState({});
   const [shouldShowForm, setShouldShowForm] = useState(false);
+  const [
+    shouldShowConfirmationModal,
+    setShouldShowConfirmationModal,
+  ] = useState(false);
+
+  const close = () => {
+    setShouldShowForm(false);
+    setShouldShowConfirmationModal(false);
+    setCurrentEvent(null);
+  };
 
   const createNewEvent = ({ day }) => {
     console.log("Creating new Event", day.format());
     setCurrentEvent(makeEvent({ day }));
+    setShouldShowForm(true);
   };
 
   const editEvent = ({ event }) => {
     console.log("Editing Event", event.day.format());
     setCurrentEvent(event);
+    setShouldShowForm(true);
+  };
+
+  const beforeDeleteEvent = ({ event }) => {
+    setShouldShowForm(false);
+    setCurrentEvent(event);
+    setShouldShowConfirmationModal(true);
   };
 
   const deleteEvent = ({ event }) => {
     console.log("Deleting Event", event.day.format());
-    setCurrentEvent(event);
+    delete events[event.id];
+    setEvents(events);
+    close();
   };
 
   const saveEvent = ({ event }) => {
     console.log("Saving Event", event.day.format());
-    setCurrentEvent(null);
+    events[event.id] = event;
+    setEvents(events);
+    close();
   };
 
   useEffect(() => {
-    console.log({ currentEvent });
-    if (!currentEvent) {
-      return setShouldShowForm(false);
-    }
-
-    setShouldShowForm(true);
-  }, [currentEvent]);
+    console.log("Events Triggered", { events });
+  }, [events]);
 
   return (
     <Calendar
       events={events}
-      states={{ currentEvent, shouldShowForm }}
-      actions={{ createNewEvent, editEvent, deleteEvent, saveEvent }}
+      states={{ currentEvent, shouldShowForm, shouldShowConfirmationModal }}
+      actions={{
+        createNewEvent,
+        editEvent,
+        deleteEvent,
+        saveEvent,
+        beforeDeleteEvent,
+        close,
+      }}
     />
   );
 };

@@ -1,7 +1,7 @@
 import React from "react";
+import moment from "moment";
+
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiTitle,
   EuiPage,
   EuiPageBody,
@@ -10,69 +10,13 @@ import {
   EuiPageContentHeaderSection,
 } from "@elastic/eui";
 
-import moment from "moment";
-import makeCalendar from "./utils/makeCalendar";
+import CalendarCell from "./components/CalendarCell";
 import EventForm from "./components/EventForm";
+import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
+
+import makeCalendar from "./utils/makeCalendar";
 
 import "./Calendar.css";
-
-const makeCalendarItem = ({
-  day = moment(),
-  current = moment(),
-  events = [],
-  index = 0,
-  states = {},
-  actions = {},
-} = {}) => {
-  const isToday = day.format("DDMMYYYY") === current.format("DDMMYYYY");
-  const isWeekend = day.format("d") === "6" || day.format("d") === "0";
-  const dayNumber = day.format("DD");
-
-  const { createNewEvent, editEvent, deleteEvent, saveEvent } = actions;
-  const { currentEvent } = states;
-
-  return (
-    <li
-      key={index}
-      className={
-        day.format("MM") === current.format("MM") ? "day" : "day other-month"
-      }
-      onDoubleClick={() => createNewEvent({ day })}
-    >
-      <div className="date">
-        {isToday ? (
-          <EuiBadge color="accent">{dayNumber}</EuiBadge>
-        ) : isWeekend ? (
-          <span className="weekend">{dayNumber}</span>
-        ) : (
-          dayNumber
-        )}
-      </div>
-      <div className="event eui-yScrollWithShadows">
-        <EuiBadgeGroup gutterSize="none">
-          {events.map((event) => (
-            <EuiBadge
-              iconType="cross"
-              iconSide="right"
-              iconOnClick={() => {
-                editEvent({ event });
-              }}
-              onClick={() => {
-                deleteEvent({ event });
-              }}
-              iconOnClickAriaLabel="Click this icon to..."
-            >
-              Badge with iconOnClick being truncated
-              {currentEvent.id === event.id ? (
-                <EventForm event={currentEvent} save={saveEvent} />
-              ) : null}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      </div>
-    </li>
-  );
-};
 
 const View = ({
   current = moment(),
@@ -81,8 +25,8 @@ const View = ({
   states = {},
 }) => {
   const calendar = makeCalendar({ current });
-  const { currentEvent, shouldShowForm } = states;
-  const { saveEvent } = actions;
+  const { currentEvent, shouldShowForm, shouldShowConfirmationModal } = states;
+  const { saveEvent, deleteEvent, close } = actions;
   return (
     <>
       <EuiPage>
@@ -95,8 +39,15 @@ const View = ({
                 </EuiTitle>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
-            {shouldShowForm ? (
+            {currentEvent && shouldShowForm ? (
               <EventForm event={currentEvent} save={saveEvent} />
+            ) : null}
+            {currentEvent && shouldShowConfirmationModal ? (
+              <ConfirmDeleteModal
+                event={currentEvent}
+                close={close}
+                remove={deleteEvent}
+              />
             ) : null}
           </EuiPageContent>
         </EuiPageBody>
@@ -116,15 +67,16 @@ const View = ({
             const week = calendar[key];
             return (
               <ul key={index} className="days">
-                {week.days.map((day, index2) =>
-                  makeCalendarItem({
-                    day,
-                    actions,
-                    states,
-                    events,
-                    index: index2,
-                  })
-                )}
+                {week.days.map((day, index2) => (
+                  <CalendarCell
+                    day={day}
+                    current={current}
+                    actions={actions}
+                    states={states}
+                    events={events}
+                    index={index2}
+                  />
+                ))}
               </ul>
             );
           })}

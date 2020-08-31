@@ -1,11 +1,11 @@
 import { htmlIdGenerator } from "@elastic/eui/lib/services";
 
-const makeEvent = ({ day, title = "", location = "" }) => ({
+const makeEvent = ({ day, title = "No Title", location = "Unknown" }) => ({
   day: day.clone(),
   id: htmlIdGenerator()(),
   title,
   location,
-  isNew: true,
+  color: "#3c3c3c",
 });
 
 export { makeEvent };
