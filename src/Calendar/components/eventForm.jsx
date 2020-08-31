@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { weather as API } from "../../http";
 
 import {
   EuiFlyout,
@@ -36,6 +37,19 @@ export default ({ event, save }) => {
   };
 
   const [location, setLocation] = useState(event.location);
+
+  const [weather, setWeather] = useState(API.queries.get.default);
+
+  useEffect(() => {
+    // TODO: Add proper debouncing
+    if (location.length > 6) {
+      API.queries.get.query({ city: location }).then((result) => {
+        console.log("Got Result", result);
+        // setWeather(result);
+      });
+    }
+  }, [location]);
+
   const handleLocationChange = ({ target: { value } }) => {
     event.location = value;
     setLocation(value);
@@ -85,6 +99,12 @@ export default ({ event, save }) => {
               isInvalid={!!errors}
             />
           </EuiFormRow>
+
+          {!weather.isDefault ? (
+            <EuiFormRow label={"Weather In " + weather.name}>
+              {weather.temp} {weather.main}
+            </EuiFormRow>
+          ) : null}
         </EuiForm>
       </EuiFlyoutBody>
     </EuiFlyout>

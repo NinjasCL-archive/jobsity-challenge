@@ -3,6 +3,7 @@ import { setupCache } from "axios-cache-adapter";
 import shared from "../shared";
 
 const root = process.env.REACT_APP_WEATHER_API;
+const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
 
 const name = "weather";
 
@@ -20,6 +21,7 @@ const http = axios.create({
 
 const client = {
   name,
+  apiKey,
   endpoints: { root, base },
   http,
   cache,
